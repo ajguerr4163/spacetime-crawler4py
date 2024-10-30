@@ -59,10 +59,12 @@ def is_valid(url):
     bool: True if the URL is valid for crawling; False otherwise.
     """
     try:
-        # Parse the URL and remove fragments
+        # Parse the URL
         parsed = urlparse(url)
-        parsed = parsed._replace(fragment="")  # Remove fragment
-        url = urlunparse(parsed)  # Update the URL to be fragment-free
+        
+        # Immediately return False if there is a fragment
+        if parsed.fragment:
+            return False
 
         # Scheme check: Only allow http and https
         if parsed.scheme not in {"http", "https"}:
@@ -100,4 +102,3 @@ def is_valid(url):
     except TypeError:
         print("TypeError for ", url)
         raise
-
