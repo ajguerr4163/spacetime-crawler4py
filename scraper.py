@@ -1,6 +1,9 @@
 import re
+import hashlib
 from urllib.parse import urlparse, urlunparse, urljoin
 from bs4 import BeautifulSoup
+
+visited_content_hashes = set()  # Global or class-level storage for content hashes
 
 def scraper(url, resp):
     """
@@ -13,38 +16,39 @@ def scraper(url, resp):
     Returns:
     list of str: List of valid URLs extracted from the page.
     """
+    # Check for duplicate content using hash to avoid duplicate traps
+    content = resp.raw_response.content if resp.raw_response else ""
+    content_hash = hashlib.md5(content).hexdigest()
+    if content_hash in visited_content_hashes:
+        return []  # Skip URLs with duplicate content
+    visited_content_hashes.add(content_hash)
+
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
     """
-    Extracts and returns a list of hyperlinks from the content of the response.
+    Extracts and returns a list of hyperlinks from the content of the response, regardless of status code.
 
     Parameters:
     url (str): The URL that was used to get the page.
     resp (Response): The response object containing status, content, and metadata.
 
     Returns:
-    list of str: List of hyperlinks found on the page.
+    list of str: List of hyperlinks found on the page, even if status is not 200.
     """
     links = []
 
-    # Process only if the response is valid and the status code is 200
-    if resp.status != 200:
-        return links  # Return an empty list if the page could not be retrieved successfully
-
     # Check if there is content in the response
-    if not resp.raw_response or not resp.raw_response.content:
-        return links  # Return an empty list if no content is available
+    if resp.raw_response and resp.raw_response.content:
+        # Parse the HTML content using BeautifulSoup
+        soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
 
-    # Parse the HTML content using BeautifulSoup
-    soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
-
-    # Extract all anchor tags and their href attributes
-    for anchor in soup.find_all('a', href=True):
-        # Use urljoin to form absolute URLs from relative paths
-        link = urljoin(url, anchor['href'])
-        links.append(link)
+        # Extract all anchor tags and their href attributes
+        for anchor in soup.find_all('a', href=True):
+            # Use urljoin to form absolute URLs from relative paths
+            link = urljoin(url, anchor['href'])
+            links.append(link)
 
     return links
 
@@ -95,6 +99,14 @@ def is_valid(url):
 
         # Path restriction for today.uci.edu
         if parsed.netloc == "today.uci.edu" and not parsed.path.startswith("/department/information_computer_sciences"):
+            return False
+
+        # Trap detection: avoid calendar and paginated URLs
+        if re.search(r"(calendar|wp-content|replytocom|php\?id=|sort=|session=|ref=|page=|start=|dir=|date=|filter=|id=|sid=|query=|view=|tag=|highlight=|theme=)", parsed.query.lower()):
+            return False
+        
+        # Avoid deeply nested paths or excessively long query strings
+        if parsed.path.count('/') > 4 or len(parsed.query) > 50:
             return False
 
         return True
