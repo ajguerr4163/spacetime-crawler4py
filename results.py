@@ -28,5 +28,5 @@ def count_unique_pages(log_file_path):
 
 # results.py
 if __name__ == "__main__":
-    unique_page_count = count_unique_pages('Worker.log')
+    unique_page_count = count_unique_pages('/home/ajguerr4/spacetime-crawler4py/Logs/Worker.log')
     print(f"Number of unique pages: {unique_page_count}")
