@@ -1,13 +1,11 @@
 import re
-import hashlib
 from urllib.parse import urlparse, urlunparse, urljoin
 from bs4 import BeautifulSoup
-
-visited_content_hashes = set()  # Global or class-level storage for content hashes
+from simhash import Simhash  
 
 def scraper(url, resp):
     """
-    Extracts links from a page response and returns only valid URLs.
+    Calls extract_next_links to obtain valid URLs, avoiding duplicates.
 
     Parameters:
     url (str): The URL of the page.
@@ -16,33 +14,43 @@ def scraper(url, resp):
     Returns:
     list of str: List of valid URLs extracted from the page.
     """
-    # Check for duplicate content using hash to avoid duplicate traps
-    content = resp.raw_response.content if resp.raw_response else ""
-    content_hash = hashlib.md5(content).hexdigest()
-    if content_hash in visited_content_hashes:
-        return []  # Skip URLs with duplicate content
-    visited_content_hashes.add(content_hash)
-
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
     """
-    Extracts and returns a list of hyperlinks from the content of the response, regardless of status code.
+    Extracts hyperlinks from the content of the response, deduplicates using Simhash.
 
     Parameters:
     url (str): The URL that was used to get the page.
     resp (Response): The response object containing status, content, and metadata.
 
     Returns:
-    list of str: List of hyperlinks found on the page, even if status is not 200.
+    list of str: List of hyperlinks found on the page, deduplicated by content similarity.
     """
+    # Initialize visited_simhashes as an attribute of the function
+    if not hasattr(extract_next_links, "visited_simhashes"):
+        extract_next_links.visited_simhashes = set()
+
     links = []
 
     # Check if there is content in the response
     if resp.raw_response and resp.raw_response.content:
         # Parse the HTML content using BeautifulSoup
         soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
+
+        # Extract clean text from the HTML, ignoring scripts and styles
+        for script_or_style in soup(['script', 'style']):
+            script_or_style.decompose()
+        content_text = soup.get_text(separator=' ', strip=True)
+
+        # Generate Simhash for the page content
+        content_simhash = Simhash(content_text).value
+
+        # Check for duplicates using Simhash similarity
+        if any(bin(content_simhash ^ existing_hash).count('1') <= 3 for existing_hash in extract_next_links.visited_simhashes):
+            return []  # Skip links if similar content is found
+        extract_next_links.visited_simhashes.add(content_simhash)  # Add new Simhash if unique
 
         # Extract all anchor tags and their href attributes
         for anchor in soup.find_all('a', href=True):
