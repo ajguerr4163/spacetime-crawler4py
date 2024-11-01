@@ -96,17 +96,17 @@ def is_valid(url):
 
         # Only allow URLs from the specified subdomains of uci.edu
         allowed_domains = {
-            "ics.uci.edu",
-            "cs.uci.edu",
-            "informatics.uci.edu",
-            "stat.uci.edu",
-            "today.uci.edu"
+            ".ics.uci.edu",
+            ".cs.uci.edu",
+            ".informatics.uci.edu",
+            ".stat.uci.edu",
+            ".today.uci.edu"
         }
         if not any(parsed.netloc.endswith(domain) for domain in allowed_domains):
             return False
 
         # Path restriction for today.uci.edu
-        if parsed.netloc == "today.uci.edu" and not parsed.path.startswith("/department/information_computer_sciences"):
+        if parsed.netloc.endswith(".today.uci.edu") and not parsed.path.startswith("/department/information_computer_sciences"):
             return False
 
         # Trap detection: avoid calendar and paginated URLs
