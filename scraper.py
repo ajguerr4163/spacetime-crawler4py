@@ -36,10 +36,9 @@ def extract_next_links(url, resp):
 
     # Check if there is content in the response
     if resp.raw_response and resp.raw_response.content:
-        # Parse the HTML content using BeautifulSoup
         soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
 
-        # Extract clean text from the HTML, ignoring scripts and styles
+        # Ignoring scripts and styles
         for script_or_style in soup(['script', 'style']):
             script_or_style.decompose()
         content_text = soup.get_text(separator=' ', strip=True)
@@ -49,7 +48,7 @@ def extract_next_links(url, resp):
 
         # Check for duplicates using Simhash similarity
         if any(bin(content_simhash ^ existing_hash).count('1') <= 3 for existing_hash in extract_next_links.visited_simhashes):
-            return []  # Skip links if similar content is found
+            return [] 
         extract_next_links.visited_simhashes.add(content_simhash)  # Add new Simhash if unique
 
         # Extract all anchor tags and their href attributes

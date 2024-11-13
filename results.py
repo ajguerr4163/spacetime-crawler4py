@@ -6,15 +6,7 @@ from bs4 import BeautifulSoup
 from collections import Counter, defaultdict
 
 def count_unique_pages(log_file_path):
-    """
-    Counts the number of unique pages from a Worker.log file, based on URL uniqueness (ignoring fragments).
-
-    Parameters:
-    log_file_path (str): The path to the Worker.log file.
-
-    Returns:
-    int: The number of unique pages.
-    """
+    """Counts the number of unique pages from a Worker.log file, based on URL uniqueness (ignoring fragments)."""
     unique_urls = set()
     url_pattern = re.compile(r'Downloaded (https?://[^\s,]+)')
 
@@ -153,12 +145,9 @@ def count_subdomains(log_file_path):
         parsed_url = urlparse(url)
         # Check if the URL is within the uci.edu domain
         if parsed_url.netloc.endswith(".uci.edu"):
-            # Extract the subdomain (e.g., vision.ics.uci.edu)
             subdomain = parsed_url.netloc
-            # Add the path to the set of pages for this subdomain
             subdomain_pages[subdomain].add(parsed_url.path)
 
-    # Prepare and print the results
     print("Subdomain, Number of Unique Pages")
     for subdomain in sorted(subdomain_pages.keys()):
         print(f"{subdomain}, {len(subdomain_pages[subdomain])}")
@@ -169,6 +158,6 @@ if __name__ == "__main__":
     unique_page_count = count_unique_pages('/home/ajguerr4/spacetime-crawler4py/Logs/Worker.log')
     print(f"Number of unique pages: {unique_page_count}")
     log_file_path = '/home/ajguerr4/spacetime-crawler4py/Logs/Worker.log'
-    #find_longest_page(log_file_path)
-    #find_most_common_words(log_file_path)
+    find_longest_page(log_file_path)
+    find_most_common_words(log_file_path)
     count_subdomains(log_file_path)
