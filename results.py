@@ -1,5 +1,5 @@
 import re
-import requests
+from requests.exceptions import SSLError
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
@@ -52,6 +52,9 @@ def count_words_in_url(url):
         # Count words in text
         words = text.split()
         return len(words)
+    except SSLError:
+        print(f"SSL error for {url}. Skipping.")
+        return 0
     except requests.RequestException as e:
         print(f"Failed to download {url}: {e}")
         return 0
