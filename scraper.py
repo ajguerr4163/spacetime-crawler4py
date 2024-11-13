@@ -117,6 +117,12 @@ def is_valid(url):
         if parsed.path.count('/') > 4 or len(parsed.query) > 50:
             return False
 
+        # Check for large files by using a HEAD request to get Content-Length
+        response = requests.head(url, timeout=5)
+        content_length = response.headers.get('Content-Length')
+        if content_length and int(content_length) > 1024 * 1024:
+            return False
+
         return True
 
     except TypeError:
