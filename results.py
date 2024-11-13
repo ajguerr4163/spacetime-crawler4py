@@ -130,11 +130,15 @@ def find_most_common_words(log_file_path, top_n=50):
         words = get_words_from_url(url)
         word_counter.update(words)
 
-    # Get the most common words
-    most_common_words = word_counter.most_common(top_n)
-    
-    # Print the top 50 most common words and their frequencies
-    print("Top 50 most common words:")
+        # Print intermediate results for top N most common words so far
+        most_common_words = word_counter.most_common(top_n)
+        print(f"Current top {top_n} most common words after processing {url}:")
+        for word, count in most_common_words:
+            print(f"{word}: {count}")
+        print("\n" + "-"*50 + "\n")
+
+    # Final top 50 most common words
+    print("Final top 50 most common words across all pages:")
     for word, count in most_common_words:
         print(f"{word}: {count}")
 
