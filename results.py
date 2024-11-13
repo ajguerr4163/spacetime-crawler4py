@@ -43,6 +43,10 @@ def extract_urls_with_status_200(log_file_path):
                     print(f"Skipping problematic URL: {url}")
                     continue
                 
+                if url == "https://www.informatics.uci.edu/explore/faculty-profiles/gloria-mark":
+                    print(f"Skipping problematic URL: {url}")
+                    continue
+
                 # Skip non-text files based on their extensions
                 if not re.search(r'\.(mpg|mp4|avi|mov|mkv|ogg|ogv|pdf|png|jpg|jpeg|gif|bmp|wav|mp3|zip|rar|gz|exe|dmg|iso)$', url.lower()):
                     urls.append(url)
