@@ -1,4 +1,5 @@
 import re
+import requests
 from requests.exceptions import SSLError
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
