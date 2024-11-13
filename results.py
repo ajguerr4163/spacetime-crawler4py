@@ -144,9 +144,31 @@ def find_most_common_words(log_file_path, top_n=50):
 
     return most_common_words
 
+def count_subdomains(log_file_path):
+    """Count unique pages for each subdomain within the uci.edu domain."""
+    urls = extract_urls_with_status_200(log_file_path)
+    subdomain_pages = defaultdict(set)
+
+    for url in urls:
+        parsed_url = urlparse(url)
+        # Check if the URL is within the uci.edu domain
+        if parsed_url.netloc.endswith(".uci.edu"):
+            # Extract the subdomain (e.g., vision.ics.uci.edu)
+            subdomain = parsed_url.netloc
+            # Add the path to the set of pages for this subdomain
+            subdomain_pages[subdomain].add(parsed_url.path)
+
+    # Prepare and print the results
+    print("Subdomain, Number of Unique Pages")
+    for subdomain in sorted(subdomain_pages.keys()):
+        print(f"{subdomain}, {len(subdomain_pages[subdomain])}")
+
+    return subdomain_pages
+
 if __name__ == "__main__":
     unique_page_count = count_unique_pages('/home/ajguerr4/spacetime-crawler4py/Logs/Worker.log')
     print(f"Number of unique pages: {unique_page_count}")
     log_file_path = '/home/ajguerr4/spacetime-crawler4py/Logs/Worker.log'
     #find_longest_page(log_file_path)
-    find_most_common_words(log_file_path)
+    #find_most_common_words(log_file_path)
+    count_subdomains(log_file_path)
