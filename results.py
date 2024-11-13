@@ -30,14 +30,18 @@ def count_unique_pages(log_file_path):
     return len(unique_urls)
 
 def extract_urls_with_status_200(log_file_path):
-    """Extract URLs with status 200 from the Worker.log file."""
+    """Extract URLs with status 200 from the Worker.log file, filtering out non-text files."""
     urls = []
     with open(log_file_path, 'r') as file:
         for line in file:
             match = re.search(r'Downloaded (\S+), status <200>', line)
             if match:
                 url = match.group(1)
-                urls.append(url)
+                # Skip non-text files based on their extensions
+                if not re.search(r'\.(mpg|mp4|avi|mov|mkv|ogg|ogv|pdf|png|jpg|jpeg|gif|bmp|wav|mp3|zip|rar|gz|exe|dmg|iso)$', url.lower()):
+                    urls.append(url)
+                else:
+                    print(f"Skipping non-text file: {url}")
     return urls
 
 def count_words_in_url(url):
@@ -76,7 +80,6 @@ def find_longest_page(log_file_path):
 
     print(f"The longest page is {longest_url} with {max_word_count} words.")
     return longest_url
-
 
 # results.py
 if __name__ == "__main__":
