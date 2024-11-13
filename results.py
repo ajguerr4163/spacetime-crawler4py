@@ -144,5 +144,5 @@ if __name__ == "__main__":
     unique_page_count = count_unique_pages('/home/ajguerr4/spacetime-crawler4py/Logs/Worker.log')
     print(f"Number of unique pages: {unique_page_count}")
     log_file_path = '/home/ajguerr4/spacetime-crawler4py/Logs/Worker.log'
-    find_longest_page(log_file_path)
+    #find_longest_page(log_file_path)
     find_most_common_words(log_file_path)
