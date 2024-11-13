@@ -3,7 +3,7 @@ import requests
 from requests.exceptions import SSLError
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
-from collections import Counter
+from collections import Counter, defaultdict
 
 def count_unique_pages(log_file_path):
     """
