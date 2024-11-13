@@ -30,13 +30,19 @@ def count_unique_pages(log_file_path):
     return len(unique_urls)
 
 def extract_urls_with_status_200(log_file_path):
-    """Extract URLs with status 200 from the Worker.log file, filtering out non-text files."""
+    """Extract URLs with status 200 from the Worker.log file, filtering out non-text files and specific problematic URLs."""
     urls = []
     with open(log_file_path, 'r') as file:
         for line in file:
             match = re.search(r'Downloaded (\S+), status <200>', line)
             if match:
                 url = match.group(1)
+                
+                # Skip the specific problematic URL
+                if url == "https://www.informatics.uci.edu/explore/faculty-profiles/melissa-mazmanian":
+                    print(f"Skipping problematic URL: {url}")
+                    continue
+                
                 # Skip non-text files based on their extensions
                 if not re.search(r'\.(mpg|mp4|avi|mov|mkv|ogg|ogv|pdf|png|jpg|jpeg|gif|bmp|wav|mp3|zip|rar|gz|exe|dmg|iso)$', url.lower()):
                     urls.append(url)
